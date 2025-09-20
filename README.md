@@ -1,94 +1,87 @@
-# Obsidian Sample Plugin
+# Sample Plugin E2E (Obsidian)
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Minimal Obsidian plugin wired for end-to-end testing and agent workflows. It provides:
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+- A tiny plugin surface (startup log, one command, one `file-open` listener)
+- E2E harness via WebdriverIO `wdio-obsidian-service`
+- Deterministic console log markers for test assertions
+- An intentional runtime-error variant for log/error-capture testing
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Quick start
 
-## First time developing plugins?
-
-Quick starting guide for new plugin devs:
-
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
-
-## Releasing new releases
-
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint ./src/`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```bash
+npm install
+npm run dev   # builds to main.js (watch)
+# Or for production build
+npm run build
 ```
 
-If you have multiple URLs, you can also do:
+Ensure `main.js` and `manifest.json` reside in your vault under `.obsidian/plugins/obsidian-sample-plugin-e2e/`.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+## Plugin behavior
+
+- On load, logs `[E2E] plugin:onload`
+- Command: `E2E: Emit Log` emits `[E2E] command:emit-log`
+- Command: `E2E: Open Sample Note` opens `Sample Note.md` in the test vault and emits `[E2E] command:open-sample-note`
+- Event: `file-open` logs `[E2E] event:file-open:<path>` and mirrors to `E2E.log` in the vault
+
+## Testing
+
+Run E2E tests (starts Obsidian with the test vault):
+
+```bash
+npm run test:e2e
 ```
 
-## API Documentation
+Included specs:
+- `plugin-smoke.e2e.ts`: asserts startup log
+- `simple-test.e2e.ts`: runs the emit-log command through command palette
+- `file-open.e2e.ts`: opens sample note and asserts file-open event log
 
-See https://github.com/obsidianmd/obsidian-api
+Runtime error test (isolated):
+
+```bash
+npm run test:e2e:runtime
+```
+
+- Uses a vault flag `.e2e-runtime-error` to make the plugin intentionally throw during `onload`.
+- The flag is created/cleaned by the test runner; no source swapping is needed.
+
+Optional E2E log file (E2E.log):
+
+```bash
+cross-env E2E_ENABLE_LOGS=1 npm run test:e2e
+```
+
+- When enabled, the plugin appends compact JSON entries to `E2E.log` in the test vault.
+- Disabled by default to keep production behavior clean.
+
+Build-failure test (standalone):
+
+```bash
+npm run test:broken
+```
+
+## Project layout
+
+```
+src/
+  main.ts               # entry point
+  commands/index.ts     # small testable commands
+  events.ts             # minimal event listener
+  utils/logging.ts      # deterministic log helpers and vault log mirror
+test/
+  specs/*.e2e.ts        # E2E test specs
+  vaults/simple         # test vault
+  (runner sets .e2e-runtime-error and .e2e-enable-logs flags here)
+```
+
+## Notes
+
+- Manifest `id` is `obsidian-sample-plugin-e2e` to match the folder name.
+- The E2E tests rely on console output markers with `[E2E]` prefix.
+- The vault `E2E.log` file is appended to for additional verification if needed.
+
+## License
+
+MIT

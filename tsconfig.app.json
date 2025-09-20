@@ -4,8 +4,8 @@
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
-    "target": "ES6",
-    "allowJs": true,
+    "target": "ES2020",
+    "allowJs": false,
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
@@ -16,18 +16,17 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "lib": [
-      "DOM",
-      "ES5",
-      "ES6",
-      "ES7"
-    ]
+    "lib": ["DOM", "ES2020"]
   },
   "include": [
-    "**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "test/**/*",
-    "node_modules/**/*"
+    "node_modules/**/*",
+    "src/**/*.backup",
+    "src/**/main.ts.backup"
   ]
 }
+
+

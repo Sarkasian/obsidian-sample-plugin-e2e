@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "name": "Test Configuration",
+    "description": "A test configuration file for WebDriverIO E2E testing",
+    "created": "2025-01-17T16:05:00.000Z",
+    "modified": "2025-01-17T16:05:00.000Z"
+  },
+  "settings": {
+    "theme": "default",
+    "showGrid": false,
+    "allowEdit": true,
+    "testMode": true
+  },
+  "testData": {
+    "sampleText": "This is sample test data for plugin testing",
+    "testValues": [1, 2, 3, 4, 5],
+    "testObject": {
+      "key1": "value1",
+      "key2": "value2"
+    }
+  },
+  "pluginSettings": {
+    "enabled": true,
+    "debugMode": false,
+    "logLevel": "info"
+  }
+}

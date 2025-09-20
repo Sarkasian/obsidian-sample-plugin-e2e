@@ -1,12 +1,22 @@
 {
 	"name": "obsidian-sample-plugin",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "This is a sample plugin for Obsidian with simple stdout capture testing",
+	"type": "module",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"build": "tsc -p tsconfig.app.json --noEmit --skipLibCheck && node esbuild.config.mjs production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"type-check": "tsc --noEmit",
+		"lint:ts": "eslint . --ext .ts",
+		"lint:fix": "eslint . --ext .ts --fix",
+		"test": "wdio run wdio.conf.mts",
+		"test:e2e": "wdio run wdio.conf.mts",
+		"test:broken": "node scripts/test-broken-plugin.js",
+		"test:e2e:runtime": "cross-env E2E_RUNTIME_ERROR=1 wdio run wdio.conf.mts",
+		"test:clean": "rimraf test-results",
+		"release:copy": "node scripts/release-copy.mjs"
 	},
 	"keywords": [],
 	"author": "",
@@ -15,10 +25,17 @@
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
+		"@wdio/spec-reporter": "^9.19.2",
 		"builtin-modules": "3.3.0",
-		"esbuild": "0.17.3",
+		"cross-env": "^10.0.0",
+		"esbuild": "^0.25.10",
+		"eslint": "^8.57.1",
 		"obsidian": "latest",
+		"obsidian-launcher": "^2.1.2",
+		"prettier": "^3.6.2",
+		"rimraf": "^5.0.10",
 		"tslib": "2.4.0",
-		"typescript": "4.7.4"
+		"typescript": "4.7.4",
+		"wdio-obsidian-service": "^2.1.2"
 	}
 }
